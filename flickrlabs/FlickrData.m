@@ -57,10 +57,7 @@
 
 - (UIImage *)getLargeImageAtIndexPath:(NSIndexPath*)indexPath
 {
-    if([_imageDictionary objectForKey:indexPath])
-        return [_imageDictionary objectForKey:indexPath];
-    
-    return nil;
+    return [_imageDictionary objectForKey:indexPath];
 }
 
 - (void)setThumbnailImage:(UIImageView *)imageView atIndexPath:(NSIndexPath*)indexPath
