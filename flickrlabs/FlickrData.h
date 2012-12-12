@@ -8,8 +8,6 @@
 
 @interface FlickrData : NSObject
 {
-    UICollectionView    *_collectionView;
-    
     NSDictionary        *_flickrDictionary;
     
     NSMutableDictionary *_imageDictionary, *_thumbnailDictionary;

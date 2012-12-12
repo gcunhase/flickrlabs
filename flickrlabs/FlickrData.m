@@ -92,8 +92,7 @@
                 [_thumbnailDictionary setObject:thumbnail forKey:indexPath];
             
             dispatch_async(dispatch_get_main_queue(), ^{
-                if([[_collectionView indexPathsForVisibleItems] indexOfObject:indexPath] != NSNotFound)
-                    [[NSNotificationCenter defaultCenter] postNotificationName:@"finishedRequest" object:indexPath];
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"finishedRequest" object:indexPath];
             });
         });
     }
