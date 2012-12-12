@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 csjones. All rights reserved.
 //
 
-#import "FlickrData.h"
+@class FlickrData;
 
 @interface CollectViewController : UICollectionViewController <UICollectionViewDataSource,UICollectionViewDelegate>
 {

@@ -15,9 +15,9 @@
     NSMutableDictionary *_imageDictionary, *_thumbnailDictionary;
 }
 
-+ (id)sharedInstanceWithCollection:(UICollectionView*)collectionView;
++ (id)sharedInstance;
 
 - (UIImage *)getLargeImageAtIndexPath:(NSIndexPath*)indexPath;
-- (void)setThumbnailImage:(UIImageView *)imageView atIndexPath:(NSIndexPath*)indexPath;
+- (UIImage *)getThumbnailImageAtIndexPath:(NSIndexPath*)indexPath;
 
 @end

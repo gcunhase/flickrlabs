@@ -10,18 +10,15 @@
 #import "FlickrData.h"
 #import "UIImage+Resize.h"
 
-#import <QuartzCore/QuartzCore.h>
-
 @interface FlickrData ()
 
 - (void)getPublicData;
-- (id)initWithCollection:(UICollectionView*)collectionView;
 
 @end
 
 @implementation FlickrData
 
-- (id)initWithCollection:(UICollectionView*)collectionView
+- (id)init
 {
     self = [super init];
     
@@ -30,15 +27,13 @@
         _thumbnailDictionary = [NSMutableDictionary dictionaryWithCapacity:10];
         _imageDictionary = [NSMutableDictionary dictionaryWithCapacity:10];
         
-        _collectionView = collectionView;
-        
 		[self getPublicData];
 	}
 	
 	return self;
 }
 
-+ (id)sharedInstanceWithCollection:(UICollectionView*)collectionView
++ (id)sharedInstance
 {
     static FlickrData *sharedInstance = nil;
 	
@@ -49,7 +44,7 @@
 	
     dispatch_once(&pred,
 				  ^{
-					  sharedInstance = [[FlickrData alloc] initWithCollection:collectionView];
+					  sharedInstance = [[FlickrData alloc] init];
 				  });
 	
     return sharedInstance;
@@ -60,18 +55,10 @@
     return [_imageDictionary objectForKey:indexPath];
 }
 
-- (void)setThumbnailImage:(UIImageView *)imageView atIndexPath:(NSIndexPath*)indexPath
+- (UIImage *)getThumbnailImageAtIndexPath:(NSIndexPath*)indexPath
 {
     if([_thumbnailDictionary objectForKey:indexPath])
-    {
-        imageView.image = [_thumbnailDictionary objectForKey:indexPath];
-        imageView.layer.shadowOpacity = .7f;
-        
-        return;
-    }
-
-    imageView.image = [UIImage imageNamed:@"picture"];
-    imageView.layer.shadowOpacity = .0f;
+        return [_thumbnailDictionary objectForKey:indexPath];
     
     if(_flickrDictionary)
     {
@@ -95,14 +82,6 @@
                                                                         bounds:CGSizeMake(320.0f, viewHeight)
                                                           interpolationQuality:kCGInterpolationDefault]
                                      forKey:indexPath];
-            else
-            {
-                UIImage *newerImage = [_imageDictionary objectForKey:indexPath];
-                
-                newerImage = [image resizedImageWithContentMode:UIViewContentModeScaleAspectFit
-                                                         bounds:CGSizeMake(320.0f, viewHeight)
-                                           interpolationQuality:kCGInterpolationDefault];
-            }
             
             UIImage     *thumbnail = [image thumbnailImage:125
                                          transparentBorder:5
@@ -114,23 +93,12 @@
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 if([[_collectionView indexPathsForVisibleItems] indexOfObject:indexPath] != NSNotFound)
-                {
-                    imageView.layer.shadowColor = [[UIColor blackColor] CGColor];
-                    imageView.layer.shadowOffset = CGSizeMake(0, 0);
-                    imageView.layer.shouldRasterize = YES;
-                    imageView.layer.shadowOpacity = .7f;
-                    imageView.layer.shadowRadius = 7;
-                    imageView.alpha = .0f;
-                    
-                    imageView.image = thumbnail;
-                    
-                    [UIView animateWithDuration:.2f animations:^{
-                        imageView.alpha = 1.0f;
-                    }];
-                }
+                    [[NSNotificationCenter defaultCenter] postNotificationName:@"finishedRequest" object:indexPath];
             });
         });
     }
+    
+    return nil;
 }
 
 - (void)getPublicData
@@ -162,8 +130,9 @@
                                                              cancelButtonTitle:@"OK"
                                                              otherButtonTitles:nil] show];
                                        else
-                                           for( unsigned i = 0; i < 5; i++)
-                                               [_collectionView reloadSections:[NSIndexSet indexSetWithIndex:i]];
+                                           for(unsigned i = 0; i < 5; i++)
+                                               for(unsigned k = 0; k < 2; k++)
+                                                   [[NSNotificationCenter defaultCenter] postNotificationName:@"finishedRequest" object:[NSIndexPath indexPathForItem:k inSection:i]];
                                    });
                                }
                                else

@@ -6,10 +6,19 @@
 //  Copyright (c) 2012 csjones. All rights reserved.
 //
 
+#import "FlickrData.h"
 #import "UIImage+Resize.h"
 #import "CollectionCell.h"
 #import "ImageViewController.h"
 #import "CollectViewController.h"
+
+#import <QuartzCore/QuartzCore.h>
+
+@interface CollectViewController ()
+
+- (void)reloadData:(NSNotification *)notification;
+
+@end
 
 @implementation CollectViewController
 
@@ -17,7 +26,9 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    flickrData = [FlickrData sharedInstanceWithCollection:self.collectionView];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadData:) name:@"finishedRequest" object:nil];
+    
+    flickrData = [FlickrData sharedInstance];
     
     self.navigationItem.titleView = [[UIImageView alloc] initWithImage:[[UIImage imageNamed:@"flickrdots"] resizedImage:CGSizeMake(33, 33)
                                                                                                    interpolationQuality:kCGInterpolationDefault]];
@@ -27,6 +38,11 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void)reloadData:(NSNotification *)notification
+{
+    [self.collectionView reloadItemsAtIndexPaths:[NSArray arrayWithObject:notification.object]];
 }
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
@@ -43,7 +59,26 @@
 {
     CollectionCell  *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"Cell" forIndexPath:indexPath];
     
-    [flickrData setThumbnailImage:cell.imageView atIndexPath:indexPath];
+    if( [flickrData getThumbnailImageAtIndexPath:indexPath] )
+    {
+        cell.imageView.layer.shadowColor = [[UIColor blackColor] CGColor];
+        cell.imageView.layer.shadowOffset = CGSizeMake(0, 0);
+        cell.imageView.layer.shouldRasterize = YES;
+        cell.imageView.layer.shadowOpacity = .7f;
+        cell.imageView.layer.shadowRadius = 7;
+        cell.imageView.alpha = .0f;
+        
+        cell.imageView.image = [flickrData getThumbnailImageAtIndexPath:indexPath];
+        
+        [UIView animateWithDuration:.2f animations:^{
+            cell.imageView.alpha = 1.0f;
+        }];
+    }
+    else
+    {
+        cell.imageView.image = [UIImage imageNamed:@"picture"];
+        cell.imageView.layer.shadowOpacity = .0f;
+    }
     
     return cell;
 }
@@ -60,7 +95,7 @@
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
     if([flickrData getLargeImageAtIndexPath:indexPath])
-        [self performSegueWithIdentifier:@"Image" sender: self];
+        [self performSegueWithIdentifier:@"Image" sender:self];
 }
 
 @end
